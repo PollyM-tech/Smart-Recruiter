@@ -1,0 +1,17 @@
+# Smart-Recruiter .gitignore file
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+*.pyo
+
+env/
+venv/
+
+
+.vscode/
+
+
+*.log
+
+.env
