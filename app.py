@@ -1,4 +1,4 @@
-# from flask_cors import CORS
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 import os
@@ -9,6 +9,7 @@ from models import db
 from resources.user import LoginResource
 from resources.user import SignupResource
 from resources.user import UserListResource
+from resources.assessments import AssessmentResource
 
 
 # Load environment variables from .env
@@ -19,15 +20,15 @@ app = Flask(__name__)
 api = Api(app)
 
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///smart-recruiter.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "super-secret")
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
-# CORS(app, allow_origins="*")
+CORS(app, allow_origins="*")
 
 
 db.init_app(app)
@@ -45,3 +46,4 @@ if __name__ == "__main__":
 api.add_resource(LoginResource, "/login")
 api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
+api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")

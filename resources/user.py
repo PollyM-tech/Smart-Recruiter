@@ -4,6 +4,8 @@ from models import db, User
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 
+
+
 class UserListResource(Resource):
     def get(self):
         users = User.query.all()
