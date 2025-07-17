@@ -1,12 +1,15 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt, jwt_required, current_user
+from app import jwt_blocklist
 from models import db, User
 from flask_bcrypt import generate_password_hash, check_password_hash
+from jwt_config import jwt_blocklist
 
 
 
 
 class UserListResource(Resource):
+    @jwt_required()
     def get(self):
         users = User.query.all()
         return [user.to_dict() for user in users], 200
@@ -57,7 +60,7 @@ class LoginResource(Resource):
         data = self.parser.parse_args()
         user = User.query.filter_by(email=data["email"]).first()
 
-        if not user or not check_password_hash(user.password_hash, data["password"]):
+        if not user or not check_password_hash(user.password, data["password"]):
             return {"message": "Invalid email or password"}, 401
 
         access_token = create_access_token(identity=str(user.id))
@@ -66,3 +69,11 @@ class LoginResource(Resource):
             "user": user.to_dict(),
             "access_token": access_token,
         }, 201
+    
+#logout
+class LogoutResource(Resource):
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]
+        jwt_blocklist.add(jti)
+        return {"message": "Logout successful"}, 200
