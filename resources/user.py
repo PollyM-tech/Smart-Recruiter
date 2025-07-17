@@ -20,8 +20,8 @@ class SignupResource(Resource):
     parser.add_argument(
         "role",
         required=True,
-        choices=("recruiter", "student"),
-        help="Role must be either recruiter or student",
+        choices=("recruiter", "interviewee"),
+        help="Role must be either recruiter or interviewee",
     )
 
     def post(self):

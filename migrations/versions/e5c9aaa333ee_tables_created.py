@@ -1,8 +1,8 @@
 """tables created
 
-Revision ID: d9e54da1eeea
+Revision ID: e5c9aaa333ee
 Revises: 
-Create Date: 2025-07-15 18:20:50.364206
+Create Date: 2025-07-17 09:43:56.189041
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd9e54da1eeea'
+revision = 'e5c9aaa333ee'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,7 +23,7 @@ def upgrade():
     sa.Column('name', sa.Text(), nullable=True),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
-    sa.Column('role', sa.Enum('recruiter', 'student', name='user_roles'), nullable=False),
+    sa.Column('role', sa.Enum('recruiter', 'interviewee', name='user_roles'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -39,7 +39,7 @@ def upgrade():
     op.create_table('invites',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('recruiter_id', sa.Integer(), nullable=True),
-    sa.Column('student_id', sa.Integer(), nullable=True),
+    sa.Column('interviewee_id', sa.Integer(), nullable=True),
     sa.Column('assessment_id', sa.Integer(), nullable=True),
     sa.Column('status', sa.Enum('pending', 'accepted', 'declined', name='invite_statuses'), nullable=True),
     sa.Column('sent_at', sa.DateTime(), nullable=True),
@@ -48,8 +48,8 @@ def upgrade():
     sa.Column('delivery_channel', sa.String(), nullable=True),
     sa.Column('token', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['assessment_id'], ['assessments.id'], ),
+    sa.ForeignKeyConstraint(['interviewee_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['recruiter_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['student_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('token')
     )

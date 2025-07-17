@@ -12,7 +12,7 @@ class User(db.Model,SerializerMixin):
     name = db.Column(db.Text)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role = db.Column(Enum("recruiter", "student", name="user_roles"), nullable=False)
+    role = db.Column(Enum("recruiter", "interviewee", name="user_roles"), nullable=False)
 
     def set_password(self, plain_password):
         self.password = generate_password_hash(plain_password)
@@ -24,7 +24,7 @@ class User(db.Model,SerializerMixin):
     submissions = db.relationship("Submissions", back_populates="user")
     feedback_given = db.relationship("Feedback", back_populates="recruiter")
     invites_sent = db.relationship("Invites", foreign_keys="Invites.recruiter_id", back_populates="recruiter")
-    invites_received = db.relationship("Invites", foreign_keys="Invites.student_id", back_populates="student")
+    invites_received = db.relationship("Invites", foreign_keys="Invites.interviewee_id", back_populates="interviewee")
     
     serialize_rules = ("-password", "-assessments", "-submissions","-feedback_given","-invites_sent","-invites_received")
 class Assessments(db.Model, SerializerMixin):
@@ -82,7 +82,7 @@ class Invites(db.Model, SerializerMixin):
     __tablename__ = "invites"
     id = db.Column(db.Integer, primary_key=True)
     recruiter_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    student_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    interviewee_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     assessment_id = db.Column(db.Integer, db.ForeignKey("assessments.id"))
     status = db.Column(Enum("pending", "accepted", "declined", name="invite_statuses"), default="pending")
     sent_at = db.Column(db.DateTime)
@@ -92,7 +92,7 @@ class Invites(db.Model, SerializerMixin):
     token = db.Column(db.String, unique=True)
 
     recruiter = db.relationship("User", foreign_keys=[recruiter_id], back_populates="invites_sent")
-    student = db.relationship("User", foreign_keys=[student_id], back_populates="invites_received")
+    interviewee = db.relationship("User", foreign_keys=[interviewee_id], back_populates="invites_received")
     assessment = db.relationship("Assessments", back_populates="invites")
 
 class Results(db.Model, SerializerMixin):
