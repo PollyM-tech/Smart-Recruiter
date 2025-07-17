@@ -11,9 +11,9 @@ flask-jwt-extended = "*"
 bcrypt = "*"
 flask-migrate = "*"
 python-dotenv = "*"
-sqlalchemy-serializer = "*"
 flask-bcrypt = "*"
 flask-cors = "*"
+sqlalchemy-serializer = "*"
 
 [dev-packages]
 
