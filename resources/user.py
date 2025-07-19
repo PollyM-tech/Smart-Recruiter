@@ -1,17 +1,14 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import create_access_token, get_jwt, jwt_required, current_user
-from app import jwt_blocklist
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 from models import db, User
-from flask_bcrypt import generate_password_hash, check_password_hash
-
-
+from werkzeug.security import generate_password_hash, check_password_hash 
+from flask import current_app
 
 class UserListResource(Resource):
     @jwt_required()
     def get(self):
         users = User.query.all()
         return [user.to_dict() for user in users], 200
-
 
 class SignupResource(Resource):
     parser = reqparse.RequestParser()
@@ -21,8 +18,8 @@ class SignupResource(Resource):
     parser.add_argument(
         "role",
         required=True,
-        choices=("recruiter", "student"),
-        help="Role must be either recruiter or student",
+        choices=("recruiter", "interviewee"),
+        help="Role must be either recruiter or interviewee",
     )
 
     def post(self):
@@ -43,8 +40,6 @@ class SignupResource(Resource):
             "user": user.to_dict(),
             "access_token": access_token,
         }, 201
-
-
 class LoginResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument(
@@ -66,12 +61,14 @@ class LoginResource(Resource):
             "message": "Login successful",
             "user": user.to_dict(),
             "access_token": access_token,
-        }, 201
-    
-#logout
+        }, 200
+
 class LogoutResource(Resource):
     @jwt_required()
     def post(self):
         jti = get_jwt()["jti"]
-        jwt_blocklist.add(jti)
+        print(f"Revoking token: {jti}")
+        print(f"Current blocklist: {current_app.jwt_blocklist}")
+        current_app.jwt_blocklist.add(jti)
+        print(f"Updated blocklist: {current_app.jwt_blocklist}")
         return {"message": "Logout successful"}, 200
