@@ -12,7 +12,7 @@ class User(db.Model,SerializerMixin):
     name = db.Column(db.Text)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    role = db.Column(Enum("recruiter", "student", name="user_roles"), nullable=False)
+    role = db.Column(Enum("recruiter", "candidate", name="user_roles"), nullable=False)
 
     def set_password(self, plain_password):
         self.password = generate_password_hash(plain_password)

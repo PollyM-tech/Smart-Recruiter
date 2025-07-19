@@ -7,7 +7,6 @@ from flask import Flask
 from flask_restful import Api
 from models import db
 from datetime import datetime, timezone
-from jwt_config import jwt_blocklist
 
 from resources.user import LoginResource
 from resources.user import SignupResource
@@ -28,14 +27,18 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
+app.config["JWT_BLOCKLIST_ENABLED"] = True
+app.config["JWT_BLOCKLIST_TOKEN_CHECKS"] = ["access", "refresh"]
 app.config["SQLALCHEMY_ECHO"] = True
 
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+jwt_blocklist = set()
 CORS(app, allow_origins="*")
 
 
 db.init_app(app)
+
 
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blocklist(jwt_header, jwt_payload):

@@ -3,8 +3,6 @@ from flask_jwt_extended import create_access_token, get_jwt, jwt_required, curre
 from app import jwt_blocklist
 from models import db, User
 from flask_bcrypt import generate_password_hash, check_password_hash
-from jwt_config import jwt_blocklist
-
 
 
 
