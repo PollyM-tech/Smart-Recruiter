@@ -57,3 +57,42 @@ class IntervieewProfileResource(Resource):
         db.session.commit()
 
         return profile.to_dict(), 201
+    @jwt_required()
+    def patch(self, id):
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if not user or user.role != "recruiter":
+            return {"error": "Unauthorized. Only recruiters can update profiles."}, 403
+
+        profile = IntervieewProfile.query.get(id)
+        if not profile:
+            return {"error": "Profile not found"}, 404
+
+        data = IntervieewProfileResource.parser.parse_args()
+
+        if data["name"] is not None:
+            profile.name = data["name"]
+        if data["interview_number"] is not None:
+            profile.interview_number = data["interview_number"]
+        if data["company"] is not None:
+            profile.company = data["company"]
+        if data["role"] is not None:
+            profile.role = data["role"]
+        if data["date"] is not None:
+            try:
+                profile.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
+            except ValueError:
+                return {"error": "Invalid date format. Use YYYY-MM-DD."}, 400
+        if data["time"] is not None:
+            try:
+                profile.time = datetime.strptime(data["time"], "%H:%M").time()
+            except ValueError:
+                return {"error": "Invalid time format. Use HH:MM."}, 400
+        if data["location"] is not None:
+            profile.location = data["location"]
+        if data["grade"] is not None:
+            profile.grade = data["grade"]
+
+        db.session.commit()
+        return profile.to_dict(), 200
