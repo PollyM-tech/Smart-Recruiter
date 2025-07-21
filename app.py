@@ -5,6 +5,7 @@ import os
 from flask_migrate import Migrate
 from flask import Flask
 from flask_restful import Api
+from flask_mail import Mail, Message
 from models import db
 from resources.user import LoginResource
 from resources.user import SignupResource
@@ -12,6 +13,8 @@ from resources.user import UserListResource
 from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
 from resources.feedback import FeedbackResource
+from resources.invites import InviteListResource
+
 
 
 
@@ -28,10 +31,18 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
 app.config["SQLALCHEMY_ECHO"] = True
+# Initialize Flask-Mail
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
 
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
+mail = Mail(app) # Initialize Flask-Mail
 
 
 db.init_app(app)
@@ -55,4 +66,8 @@ api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questi
 api.add_resource(QuestionDetailResource, "/questions/<int:id>")
 
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
+
+api.add_resource(InviteListResource, "/invites")
+
+
 

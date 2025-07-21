@@ -27,7 +27,7 @@ class User(db.Model,SerializerMixin):
     invites_sent = db.relationship("Invites", foreign_keys="Invites.recruiter_id", back_populates="recruiter")
     invites_received = db.relationship("Invites", foreign_keys="Invites.interviewee_id", back_populates="interviewee")
     
-    serialize_rules = ("-password", "-assessments", "-submissions","-feedback_given","-invites_sent","-invites_received")
+    serialize_rules = ("-assessments", "-submissions","-feedback_given","-invites_sent","-invites_received")
 class Assessments(db.Model, SerializerMixin):
     __tablename__ = "assessments"
     id = db.Column(db.Integer, primary_key=True)
