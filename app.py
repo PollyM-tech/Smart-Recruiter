@@ -13,6 +13,7 @@ from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
 from resources.feedback import FeedbackResource
 from resources.Submission import SubmissionListResource
+from resources.invites import InviteListResource, InviteResource, InviteAcceptanceResource
 
 
 
@@ -58,4 +59,10 @@ api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questi
 api.add_resource(QuestionDetailResource, "/questions/<int:id>")
 
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
+
+api.add_resource(InviteListResource, "/invites")
+api.add_resource(InviteResource, "/invites/<int:invite_id>")
+api.add_resource(InviteAcceptanceResource, "/invites/accept/<string:token>")
+
+
 
