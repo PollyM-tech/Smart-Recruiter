@@ -78,6 +78,13 @@ class Submissions(db.Model, SerializerMixin):
 
 class Feedback(db.Model, SerializerMixin):
     __tablename__ = "feedback"
+    serialize_rules = (
+        "-submission", 
+        "-question.feedback_entries",  
+        "-recruiter.feedback_given",  
+        "question.id", "question.prompt",  
+        "recruiter.id", "recruiter.name", "recruiter.email", )
+    
     id = db.Column(db.Integer, primary_key=True)
     question_id = db.Column(db.Integer, db.ForeignKey("questions.id"))
     submission_id = db.Column(db.Integer, db.ForeignKey("submissions.id"))
