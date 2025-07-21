@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy_serializer import SerializerMixin
 
 
+
 db = SQLAlchemy()
 
 class User(db.Model,SerializerMixin):
@@ -40,6 +41,9 @@ class Assessments(db.Model, SerializerMixin):
     submissions = db.relationship("Submissions", back_populates="assessment")
     invites = db.relationship("Invites", back_populates="assessment")
 
+    serialize_rules = ("-creator", "-questions", "-submissions", "-invites")
+
+
 class Questions(db.Model, SerializerMixin):
     __tablename__ = "questions"
     id = db.Column(db.Integer, primary_key=True)
@@ -51,6 +55,9 @@ class Questions(db.Model, SerializerMixin):
 
     assessment = db.relationship("Assessments", back_populates="questions")
     feedback_entries = db.relationship("Feedback", back_populates="question")
+
+    serialize_rules = ("-assessment", "-feedback_entries")
+
 
 class Submissions(db.Model, SerializerMixin):
     __tablename__ = "submissions"
@@ -65,6 +72,9 @@ class Submissions(db.Model, SerializerMixin):
     user = db.relationship("User", back_populates="submissions")
     feedback = db.relationship("Feedback", back_populates="submission")
     result = db.relationship("Results", back_populates="submission", uselist=False)
+
+    serialize_rules = ("-assessment", "-user", "-feedback", "-result")
+
 
 class Feedback(db.Model, SerializerMixin):
     __tablename__ = "feedback"
@@ -84,6 +94,9 @@ class Feedback(db.Model, SerializerMixin):
     question = db.relationship("Questions", back_populates="feedback_entries")
     submission = db.relationship("Submissions", back_populates="feedback")
     recruiter = db.relationship("User", back_populates="feedback_given")
+
+    serialize_rules = ("-question", "-submission", "-recruiter")
+
 
 class Invites(db.Model, SerializerMixin):
     __tablename__ = "invites"
@@ -114,3 +127,4 @@ class Results(db.Model, SerializerMixin):
     feedback_summary = db.Column(db.Text)
 
     submission = db.relationship("Submissions", back_populates="result")
+

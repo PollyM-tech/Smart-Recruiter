@@ -10,7 +10,9 @@ from resources.user import LoginResource
 from resources.user import SignupResource
 from resources.user import UserListResource
 from resources.assessments import AssessmentResource
+from resources.Questions import QuestionDetailResource,QuestionsListResource
 from resources.feedback import FeedbackResource
+
 
 
 # Load environment variables from .env
@@ -29,7 +31,7 @@ app.config["SQLALCHEMY_ECHO"] = True
 
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
-CORS(app, allow_origins="*")
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 db.init_app(app)
@@ -48,4 +50,9 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
 api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")
+
+api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questions")
+api.add_resource(QuestionDetailResource, "/questions/<int:id>")
+
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
+
