@@ -12,6 +12,7 @@ from resources.user import UserListResource
 from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
 from resources.feedback import FeedbackResource
+from resources.Submission import SubmissionListResource
 
 
 
@@ -50,6 +51,8 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
 api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")
+api.add_resources(SubmissionListResource, "/submissions")
+
 
 api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questions")
 api.add_resource(QuestionDetailResource, "/questions/<int:id>")
