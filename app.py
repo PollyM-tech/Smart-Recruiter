@@ -10,6 +10,7 @@ from resources.user import LoginResource
 from resources.user import SignupResource
 from resources.user import UserListResource
 from resources.assessments import AssessmentResource
+from resources.feedback import FeedbackResource
 
 
 # Load environment variables from .env
@@ -47,3 +48,4 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
 api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")
+api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
