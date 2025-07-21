@@ -11,6 +11,7 @@ from resources.user import SignupResource
 from resources.user import UserListResource
 from resources.assessments import AssessmentResource
 from resources.feedback import FeedbackResource
+from resources.profile import IntervieewProfileResource
 
 
 # Load environment variables from .env
@@ -49,3 +50,4 @@ api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
 api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
+api.add_resource(IntervieewProfileResource, "/profile", "/profile/<int:id>")
