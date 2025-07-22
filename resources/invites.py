@@ -12,18 +12,6 @@ invite_parser.add_argument("assessment_id", type=int, required=True, help="Asses
 invite_parser.add_argument("interviewee_email", type=str, required=True, help="Interviewee email is required")
 invite_parser.add_argument('expires_in_days', type=int, default=7, help='Expiration in days (default: 7)')
 
-class InviteResource(Resource):
-    @jwt_required()
-    def get(self, invite_id):
-        current_user_id = get_jwt_identity()
-        invite = Invites.query.get_or_404(invite_id)
-        
-        # Verify user recruiter or interviewee
-        if invite.recruiter_id != current_user_id and invite.interviewee_id != current_user_id:
-            return {"message": "Unauthorized"}, 403
-            
-        return invite.to_dict(), 200
-
 
 class InviteListResource(Resource):
     @jwt_required()
@@ -110,7 +98,7 @@ Best regards,
 class InviteAcceptanceResource(Resource):
     @jwt_required()
     def patch(self, token):
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         invite = Invites.query.filter_by(token=token).first()
         
         if not invite:
@@ -133,3 +121,16 @@ class InviteAcceptanceResource(Resource):
             "message": "Invitation accepted successfully",
             "assessment_id": invite.assessment_id
         }, 200
+    
+
+class InviteResource(Resource):
+    @jwt_required()
+    def get(self, invite_id):
+        current_user_id = int(get_jwt_identity())
+        invite = Invites.query.get_or_404(invite_id)
+        
+        # Verify user recruiter or interviewee
+        if invite.recruiter_id != current_user_id and invite.interviewee_id != current_user_id:
+            return {"message": "Unauthorized"}, 403
+            
+        return invite.to_dict(), 200
