@@ -7,14 +7,15 @@ from flask import Flask
 from flask_restful import Api
 from flask_mail import Mail, Message
 from models import db
+from flask_mail import Mail
 from resources.user import LoginResource
 from resources.user import SignupResource
 from resources.user import UserListResource
 from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
 from resources.feedback import FeedbackResource
-from resources.invites import InviteListResource
-
+from resources.Submission import SubmissionListResource
+from resources.invites import InviteListResource, InviteResource, InviteAcceptanceResource
 
 
 
@@ -39,10 +40,19 @@ app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
 app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
 
+#mail configuration
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
+
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 mail = Mail(app) # Initialize Flask-Mail
+mail = Mail(app)
 
 
 db.init_app(app)
@@ -61,6 +71,8 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
 api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")
+api.add_resource(SubmissionListResource, "/submissions")
+
 
 api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questions")
 api.add_resource(QuestionDetailResource, "/questions/<int:id>")
@@ -68,6 +80,8 @@ api.add_resource(QuestionDetailResource, "/questions/<int:id>")
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
 
 api.add_resource(InviteListResource, "/invites")
+api.add_resource(InviteResource, "/invites/<int:invite_id>")
+api.add_resource(InviteAcceptanceResource, "/invites/accept/<string:token>")
 
 
 
