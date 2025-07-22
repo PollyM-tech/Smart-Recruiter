@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from flask_restful import Resource, reqparse
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_mail import Message
+from flask import current_app
 from models import db, User, Invites, Assessments
-from app import mail
 import os
 import secrets
 
@@ -44,7 +44,7 @@ class InviteListResource(Resource):
         if not assessment:
             return {"message": "Assessment not found or permission denied"}, 404
         
-        # Finding interviewee
+        # Finding interviewee (do this regardless of MAIL_ENABLED)
         interviewee = User.query.filter_by(
             email=data['interviewee_email'], 
             role='interviewee'
@@ -54,12 +54,9 @@ class InviteListResource(Resource):
         
         # Generating token
         token = secrets.token_urlsafe(32)
-        
-        # Calculating expiration
-        expires_in_days = data['expires_in_days']
-        expires_at = datetime.utcnow() + timedelta(days=expires_in_days)
+        expires_at = datetime.utcnow() + timedelta(days=data['expires_in_days'])
 
-        # Creating invitation record
+        # Create invite record
         invite = Invites(
             recruiter_id=current_user_id,
             interviewee_id=interviewee.id,
@@ -67,19 +64,19 @@ class InviteListResource(Resource):
             status="pending",
             token=token,
             expires_at=expires_at,
-            sent_at=datetime.utcnow()  # Add sent_at timestamp
+            sent_at=datetime.utcnow()
         )
         db.session.add(invite)
         db.session.commit()
 
-        # Sending email with invitation
-        try:
-            frontend_url = os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173')
-            invite_url = f"{frontend_url}/invites/accept?token={token}"
+        # Conditional email sending
+        if os.getenv("MAIL_ENABLED", "true").lower() == "true":
+            try:
+                frontend_url = os.getenv('FRONTEND_BASE_URL', 'http://localhost:5173')
+                invite_url = f"{frontend_url}/invites/accept?token={token}"
 
-            subject = "Assessment Invitation"
-            # Improved email formatting
-            body = f"""
+                subject = "Assessment Invitation"
+                body = f"""
 Hello {interviewee.name},
 
 You have been invited to participate in an assessment: {assessment.title}.
@@ -91,21 +88,24 @@ This invitation will expire on {expires_at.strftime('%Y-%m-%d %H:%M UTC')}.
 
 Best regards,
 {recruiter.name}
-            """
-            msg = Message(subject=subject, recipients=[interviewee.email], body=body)
-            mail.send(msg)
-            return {
-                "message": "Invite sent successfully",
-                "invite": {
-                    "id": invite.id,
-                    "token": token,
-                    "expires_at": expires_at.isoformat()
-                }
-            }, 201
+                """
+                msg = Message(subject=subject, recipients=[interviewee.email], body=body)
+                current_app.extensions['mail'].send(msg)
 
-        except Exception as e:
-            db.session.rollback()
-            return {"message": f"Failed to send email. Please try again later: {str(e)}"}, 500
+            except Exception as e:
+                db.session.rollback()
+                return {"message": f"Failed to send email. Please try again later: {str(e)}"}, 500
+
+        # Success response (regardless of email)
+        return {
+            "message": "Invite created successfully",
+            "invite": {
+                "id": invite.id,
+                "token": token,
+                "expires_at": expires_at.isoformat()
+            }
+        }, 201
+
 
 class InviteAcceptanceResource(Resource):
     @jwt_required()
