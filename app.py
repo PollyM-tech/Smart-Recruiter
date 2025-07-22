@@ -5,7 +5,7 @@ import os
 from flask_migrate import Migrate
 from flask import Flask
 from flask_restful import Api
-from flask_mail import Mail, Message
+from flask_mail import Mail
 from models import db
 from flask_mail import Mail
 from resources.user import LoginResource
@@ -52,7 +52,7 @@ migrate = Migrate(app, db)
 jwt = JWTManager(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 mail = Mail(app) # Initialize Flask-Mail
-mail = Mail(app)
+
 
 
 db.init_app(app)
