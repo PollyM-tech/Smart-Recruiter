@@ -7,15 +7,17 @@ from flask import Flask
 from flask_restful import Api
 from flask_mail import Mail
 from models import db
-from flask_mail import Mail
 from resources.user import LoginResource
 from resources.user import SignupResource
 from resources.user import UserListResource
 from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
+from resources.results import IntervieweeResultsResource, ResultReleaseResource,ResultCreateOrUpdateResource
+
 from resources.feedback import FeedbackResource
-from resources.profile import IntervieewProfileResource
-from resources.Submission import SubmissionListResource
+#from resources.profile import IntervieewProfileResource
+from resources.Submission import SubmissionListResource,SubmissionDetailResource
+
 from resources.invites import InviteListResource, InviteResource, InviteAcceptanceResource
 
 
@@ -73,14 +75,14 @@ api.add_resource(SignupResource, "/signup")
 api.add_resource(UserListResource, "/users")
 api.add_resource(AssessmentResource, "/assessments", "/assessments/<int:assessment_id>")
 api.add_resource(SubmissionListResource, "/submissions")
+api.add_resource(SubmissionDetailResource, "/submissions/<int:submission_id>")
 api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questions")
 api.add_resource(QuestionDetailResource, "/questions/<int:id>")
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
-api.add_resource(IntervieewProfileResource, "/profile", "/profile/<int:id>")
+#api.add_resource(IntervieewProfileResource, "/profile", "/profile/<int:id>")
 api.add_resource(InviteListResource, "/invites")
 api.add_resource(InviteResource, "/invites/<int:invite_id>")
 api.add_resource(InviteAcceptanceResource, "/invites/accept/<string:token>")
-
-
-
-
+api.add_resource(IntervieweeResultsResource, "/interviewee/results")
+api.add_resource(ResultReleaseResource, "/results/<int:result_id>/release")
+api.add_resource(ResultCreateOrUpdateResource, "/results")
