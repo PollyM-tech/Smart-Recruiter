@@ -26,6 +26,9 @@ class User(db.Model,SerializerMixin):
     feedback_given = db.relationship("Feedback", back_populates="recruiter")
     invites_sent = db.relationship("Invites", foreign_keys="Invites.recruiter_id", back_populates="recruiter")
     invites_received = db.relationship("Invites", foreign_keys="Invites.interviewee_id", back_populates="interviewee")
+    profiles = db.relationship("Profile", back_populates="user")
+   
+
     
     serialize_rules = ("-assessments", "-submissions","-feedback_given","-invites_sent","-invites_received")
 class Assessments(db.Model, SerializerMixin):
@@ -128,3 +131,21 @@ class Results(db.Model, SerializerMixin):
 
     submission = db.relationship("Submissions", back_populates="result")
 
+
+class Profile(db.Model, SerializerMixin):
+    __tablename__ = "profiles"
+    id = db.Column(db.Integer, primary_key=True)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    name = db.Column(db.String, nullable=True) 
+    company = db.Column(db.String, nullable=True)
+    role = db.Column(db.String, nullable=True)
+    location = db.Column(db.String, nullable=True)
+    skills = db.Column(db.Text, nullable=True)       
+    education = db.Column(db.Text, nullable=True) 
+    experience = db.Column(db.Text, nullable=True)
+   
+
+    user = db.relationship("User", back_populates="profiles")
+
+    serialize_rules = ("-user",)
