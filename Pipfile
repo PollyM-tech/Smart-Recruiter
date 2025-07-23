@@ -10,12 +10,12 @@ bcrypt = "*"
 flask-migrate = "*"
 python-dotenv = "*"
 flask-bcrypt = "*"
-sqlalchemy-serializer = "*"
 flask-restful = "*"
 flask-jwt-extended = "*"
 flask-cors = "*"
 blinker = "*"
 flask-mail = "*"
+sqlalchemy-serializer = "*"
 
 [dev-packages]
 
