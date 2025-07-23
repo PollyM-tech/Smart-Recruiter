@@ -65,6 +65,7 @@ class LoginResource(Resource):
             "message": "Login successful",
             
             "access_token": access_token,
+
             "user": {
                 "id": user.id,
                 "name": user.name,
@@ -72,4 +73,5 @@ class LoginResource(Resource):
                 "role": user.role,
             },
             "role": user.role,
+
         }, 201
