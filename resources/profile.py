@@ -1,98 +1,90 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import IntervieewProfile, User, db
+from models import Profile, User, db
 from datetime import datetime
 
-class IntervieewProfileResource(Resource):
+def nullable_str(value):
+    return value if value not in (None, '', 'null') else None
+
+class ProfileResource(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument("name", type=str, required=True, help="Name is required")
-    parser.add_argument("interview_number", type=int, required=True, help="Interview number is required")
-    parser.add_argument("company", type=str, required=True, help="Company is required")
-    parser.add_argument("role", type=str, required=True, help="Role is required")
-    parser.add_argument("date", type=str, required=True, help="Date is required in YYYY-MM-DD format")
-    parser.add_argument("time", type=str, required=True, help="Time is required in HH:MM format")
-    parser.add_argument("location", type=str, required=True, help="Location is required")
-    parser.add_argument("grade", type=float, required=False, help="Grade is required")
+    parser.add_argument("name", type=str, required=False)
+    parser.add_argument("company", type=str, required=False)
+    parser.add_argument("role", type=str, required=False)
+    parser.add_argument("location", type=nullable_str, required=False)
+    parser.add_argument("skills", type=nullable_str, required=False)
+    parser.add_argument("education", type=nullable_str, required=False)
+    parser.add_argument("experience", type=nullable_str, required=False)
 
     def get(self, id=None):
         if id is None:
-            profiles = IntervieewProfile.query.all()
+            profiles = Profile.query.all()
             return [profile.to_dict() for profile in profiles], 200 
             
         else:
-          profile = IntervieewProfile.query.filter_by(id=id).first()
+          profile = Profile.query.filter_by(id=id).first()
           if profile:
              return profile.to_dict(), 200
           return {"error": "Feedback not found"}, 404
         
     @jwt_required()
     def post(self):
+        # Identify logged-in user
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
+        if not user:
+            return {"error": "Unauthorized. User not found."}, 404
 
-        if not user or user.role != "recruiter":
-            return {"error": "Unauthorized. Only recruiters can create profiles."}, 403
+        data = self.parser.parse_args()
 
-        data = IntervieewProfileResource.parser.parse_args()
-
-        # Convert date and time strings to proper datetime objects
-        try:
-            date_obj = datetime.strptime(data["date"], "%Y-%m-%d").date()
-            time_obj = datetime.strptime(data["time"], "%H:%M").time()
-        except ValueError:
-            return {"error": "Invalid date or time format"}, 400
-
-        profile = IntervieewProfile(
-            name=data["name"],
-            interview_number=data["interview_number"],
-            company=data["company"],
-            role=data["role"],
-            date=date_obj,
-            time=time_obj,
-            location=data["location"],
-            grade=data["grade"]
+        # Create a profile for the logged-in user only
+        profile = Profile(
+            user_id=current_user_id,
+            name=data.get("name"),
+            company=data.get("company"),
+            role=data.get("role"),
+            location=data.get("location"),
+            skills=data.get("skills"),
+            education=data.get("education"),
+            experience=data.get("experience")
         )
 
         db.session.add(profile)
         db.session.commit()
 
         return profile.to_dict(), 201
+
     @jwt_required()
     def patch(self, id):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
 
-        if not user or user.role != "recruiter":
-            return {"error": "Unauthorized. Only recruiters can update profiles."}, 403
-
-        profile = IntervieewProfile.query.get(id)
+        profile = Profile.query.get(id)
         if not profile:
             return {"error": "Profile not found"}, 404
 
-        data = IntervieewProfileResource.parser.parse_args()
+        # Only allow recruiters to edit any profile
+        # Interviewees can only edit their own
+        if user.role != "recruiter" and profile.user_id != current_user_id:
+            return {"error": "Unauthorized. You can only edit your own profile."}, 403
 
+        data = ProfileResource.parser.parse_args()
+
+        # Update fields if provided
         if data["name"] is not None:
             profile.name = data["name"]
-        if data["interview_number"] is not None:
-            profile.interview_number = data["interview_number"]
         if data["company"] is not None:
             profile.company = data["company"]
         if data["role"] is not None:
             profile.role = data["role"]
-        if data["date"] is not None:
-            try:
-                profile.date = datetime.strptime(data["date"], "%Y-%m-%d").date()
-            except ValueError:
-                return {"error": "Invalid date format. Use YYYY-MM-DD."}, 400
-        if data["time"] is not None:
-            try:
-                profile.time = datetime.strptime(data["time"], "%H:%M").time()
-            except ValueError:
-                return {"error": "Invalid time format. Use HH:MM."}, 400
         if data["location"] is not None:
             profile.location = data["location"]
-        if data["grade"] is not None:
-            profile.grade = data["grade"]
+        if data["skills"] is not None:
+            profile.skills = data["skills"]
+        if data["education"] is not None:
+            profile.education = data["education"]
+        if data["experience"] is not None:
+            profile.experience = data["experience"]
 
         db.session.commit()
         return profile.to_dict(), 200
