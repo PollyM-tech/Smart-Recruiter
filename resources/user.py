@@ -65,4 +65,5 @@ class LoginResource(Resource):
             "message": "Login successful",
             "user": user.to_dict(),
             "access_token": access_token,
+             "role": user.role
         }, 201
