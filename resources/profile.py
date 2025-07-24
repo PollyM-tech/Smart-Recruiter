@@ -16,17 +16,25 @@ class ProfileResource(Resource):
     parser.add_argument("education", type=nullable_str, required=False)
     parser.add_argument("experience", type=nullable_str, required=False)
 
+    @jwt_required()
     def get(self, id=None):
+        
+        if id == "self":
+            current_user_id = get_jwt_identity()
+            profile = Profile.query.filter_by(user_id=current_user_id).first()
+            if not profile:
+                return {"error": "Profile not found"}, 404
+            return profile.to_dict(), 200
+
         if id is None:
             profiles = Profile.query.all()
-            return [profile.to_dict() for profile in profiles], 200 
-            
-        else:
-          profile = Profile.query.filter_by(id=id).first()
-          if profile:
-             return profile.to_dict(), 200
-          return {"error": "Feedback not found"}, 404
+            return [profile.to_dict() for profile in profiles], 200
         
+        profile = Profile.query.filter_by(id=id).first()
+        if profile:
+            return profile.to_dict(), 200
+        return {"error": "Profile not found"}, 404
+    
     @jwt_required()
     def post(self):
         # Identify logged-in user
@@ -58,8 +66,13 @@ class ProfileResource(Resource):
     def patch(self, id):
         current_user_id = get_jwt_identity()
         user = User.query.get(current_user_id)
+        if id == "self":
+            profile = Profile.query.filter_by(user_id=current_user_id).first()
+            if not profile:
+                return {"error": "Profile not found"}, 404
+        else:
+          profile = Profile.query.get(id) 
 
-        profile = Profile.query.get(id)
         if not profile:
             return {"error": "Profile not found"}, 404
 
@@ -70,21 +83,9 @@ class ProfileResource(Resource):
 
         data = ProfileResource.parser.parse_args()
 
-        # Update fields if provided
-        if data["name"] is not None:
-            profile.name = data["name"]
-        if data["company"] is not None:
-            profile.company = data["company"]
-        if data["role"] is not None:
-            profile.role = data["role"]
-        if data["location"] is not None:
-            profile.location = data["location"]
-        if data["skills"] is not None:
-            profile.skills = data["skills"]
-        if data["education"] is not None:
-            profile.education = data["education"]
-        if data["experience"] is not None:
-            profile.experience = data["experience"]
+        for field, value in data.items():
+            if value is not None:
+                setattr(profile, field, value)
 
         db.session.commit()
         return profile.to_dict(), 200
