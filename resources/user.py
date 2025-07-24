@@ -63,7 +63,15 @@ class LoginResource(Resource):
         access_token = create_access_token(identity=str(user.id))
         return {
             "message": "Login successful",
-            "user": user.to_dict(),
+            
             "access_token": access_token,
-             "role": user.role
+
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "role": user.role,
+            },
+            "role": user.role,
+
         }, 201
