@@ -55,7 +55,7 @@ app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
 
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 mail = Mail(app) # Initialize Flask-Mail
 
 
@@ -82,9 +82,10 @@ api.add_resource(QuestionsListResource, "/assessments/<int:assessment_id>/questi
 api.add_resource(QuestionDetailResource, "/questions/<int:id>")
 api.add_resource(FeedbackResource, "/feedback", "/feedback/<int:id>")
 
-api.add_resource(ProfileResource, "/profile", "/profile/<int:id>")
+api.add_resource(ProfileResource, "/profile", "/profile/<id>")
 
-#api.add_resource(IntervieewProfileResource, "/profile", "/profile/<int:id>")
+
+
 
 api.add_resource(InviteListResource, "/invites")
 api.add_resource(InviteResource, "/invites/<int:invite_id>")
