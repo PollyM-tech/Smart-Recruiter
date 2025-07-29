@@ -7,12 +7,10 @@ from models import db, User, Invites, Assessments
 import os
 import secrets
 
-# Parser for incoming invite creation data
 invite_parser = reqparse.RequestParser()
 invite_parser.add_argument("assessment_id", type=int, required=True, help="Assessment ID is required")
 invite_parser.add_argument("interviewee_email", type=str, required=True, help="Interviewee email is required")
 invite_parser.add_argument("expires_in_days", type=int, default=7, help="Expiration in days (default: 7)")
-
 
 class InviteResource(Resource):
     @jwt_required()
@@ -25,8 +23,13 @@ class InviteResource(Resource):
 
         return invite.to_dict(), 200
 
-
 class InviteListResource(Resource):
+    @jwt_required()
+    def get(self):
+        current_user_id = int(get_jwt_identity())
+        invites = Invites.query.filter_by(recruiter_id=current_user_id).all()
+        return [invite.to_dict() for invite in invites], 200
+
     @jwt_required()
     def post(self):
         current_user_id = int(get_jwt_identity())
@@ -52,7 +55,6 @@ class InviteListResource(Resource):
         if not interviewee:
             return {"message": "Interviewee not found. Please ensure they are registered"}, 404
 
-        # Create unique token and expiration
         token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=data['expires_in_days'])
 
@@ -67,9 +69,8 @@ class InviteListResource(Resource):
         )
 
         db.session.add(invite)
-        db.session.commit()
-
-        # Conditionally send email
+        
+        # Attempt to send email but commit invite regardless
         if os.getenv("MAIL_ENABLED", "true").lower() == "true":
             try:
                 frontend_url = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
@@ -92,36 +93,32 @@ Best regards,
 
                 msg = Message(subject=subject, recipients=[interviewee.email], body=body)
                 current_app.extensions["mail"].send(msg)
-
             except Exception as e:
-                db.session.rollback()
-                return {"message": f"Failed to send email. Please try again later: {str(e)}"}, 500
+                current_app.logger.error(f"Email failed: {str(e)}")
+        
+        db.session.commit()
 
+        # Return invite with additional interviewee_email field
         return {
             "message": "Invite created successfully",
             "invite": {
-                "id": invite.id,
-                "token": token,
-                "expires_at": expires_at.isoformat()
+                **invite.to_dict(),
+                "interviewee_email": interviewee.email
             }
         }, 201
-
 
 class InviteAcceptanceResource(Resource):
     @jwt_required()
     def patch(self, token):
         current_user_id = int(get_jwt_identity())
-
         invite = Invites.query.filter_by(token=token).first()
+        
         if not invite:
             return {"message": "Invalid invitation token"}, 404
-
         if invite.interviewee_id != current_user_id:
             return {"message": "You are not authorized to accept this invite"}, 403
-
         if invite.status != "pending":
             return {"message": "This invitation has already been processed"}, 400
-
         if datetime.utcnow() > invite.expires_at:
             return {"message": "This invitation has expired"}, 400
 

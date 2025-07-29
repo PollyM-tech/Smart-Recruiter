@@ -111,12 +111,20 @@ class Invites(db.Model, SerializerMixin):
     sent_at = db.Column(db.DateTime)
     expires_at = db.Column(db.DateTime)
     accepted_at = db.Column(db.DateTime)
-    delivery_channel = db.Column(db.String)
     token = db.Column(db.String, unique=True)
 
     recruiter = db.relationship("User", foreign_keys=[recruiter_id], back_populates="invites_sent")
     interviewee = db.relationship("User", foreign_keys=[interviewee_id], back_populates="invites_received")
     assessment = db.relationship("Assessments", back_populates="invites")
+
+    serialize_rules = (
+        '-recruiter.invites_sent',
+        '-recruiter.invites_received',
+        '-interviewee.invites_sent',
+        '-interviewee.invites_received',
+        '-assessment.invites',
+        '-token'
+    )
 
 class Results(db.Model, SerializerMixin):
     __tablename__ = "results"
