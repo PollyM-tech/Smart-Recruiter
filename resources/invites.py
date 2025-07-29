@@ -28,6 +28,20 @@ class InviteResource(Resource):
 
 class InviteListResource(Resource):
     @jwt_required()
+    def get(self):
+        current_user_id = int(get_jwt_identity())
+        recruiter = User.query.get(current_user_id)
+        if not recruiter or recruiter.role != "recruiter":
+            return {"message": "Unauthorized"}, 403
+
+        invites = (
+            Invites.query.filter_by(recruiter_id=current_user_id)
+            .order_by(Invites.sent_at.desc())
+            .all()
+        )
+        return [invite.to_dict() for invite in invites], 200
+
+    @jwt_required()
     def post(self):
         current_user_id = int(get_jwt_identity())
         data = invite_parser.parse_args()
