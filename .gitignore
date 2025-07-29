@@ -9,7 +9,7 @@ env/
 venv/
 
 instance/
-
+migrations/versions/
 .vscode/
 
 

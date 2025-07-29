@@ -17,6 +17,8 @@ from resources.results import IntervieweeResultsResource, ResultReleaseResource,
 from resources.feedback import FeedbackResource
 from resources.profile import ProfileResource
 from resources.Submission import SubmissionListResource
+from resources.notification import NotificationListResource,NotificationReadResource
+
 
 #from resources.profile import IntervieewProfileResource
 from resources.Submission import SubmissionListResource,SubmissionDetailResource
@@ -94,4 +96,5 @@ api.add_resource(IntervieweeResultsResource, "/interviewee/results")
 api.add_resource(ResultReleaseResource, "/results/<int:result_id>/release")
 api.add_resource(ResultCreateOrUpdateResource, "/results")
 api.add_resource(IntervieweeRankingResource, "/interviewee-rankings")
-
+api.add_resource(NotificationListResource, "/notifications")
+api.add_resource(NotificationReadResource, "/notifications/<int:notification_id>/read")
