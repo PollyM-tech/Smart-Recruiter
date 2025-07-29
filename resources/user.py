@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import create_access_token
-from models import db, User
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from models import db, User,Assessments
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 
@@ -75,3 +75,15 @@ class LoginResource(Resource):
             "role": user.role,
 
         }, 201
+
+class RecruiterStatsResource(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        interviewees = User.query.filter_by(role="interviewee").count()
+        assessments = Assessments.query.filter_by(creator_id=user_id).count()
+
+        return {
+            "interviewees": interviewees,
+            "assessments": assessments,
+        }, 200
