@@ -51,10 +51,14 @@ class Questions(db.Model, SerializerMixin):
     __tablename__ = "questions"
     id = db.Column(db.Integer, primary_key=True)
     assessment_id = db.Column(db.Integer, db.ForeignKey("assessments.id"))
-    type = db.Column(Enum("multiple_choice", "codekata", name="question_types"), nullable=False)
+    type = db.Column(
+        Enum("multiple_choice", "codekata", "codewars", name="question_types"),
+        nullable=False,
+    )
     prompt = db.Column(db.Text)
     options = db.Column(db.JSON)
     answer_key = db.Column(db.Text)
+    meta = db.Column(db.JSON)  # 🌟 Optional: for Codewars metadata
 
     assessment = db.relationship("Assessments", back_populates="questions")
     feedback_entries = db.relationship("Feedback", back_populates="question")

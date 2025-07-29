@@ -12,7 +12,7 @@ from resources.user import SignupResource
 from resources.user import UserListResource
 from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
-from resources.results import IntervieweeResultsResource, ResultReleaseResource,ResultCreateOrUpdateResource
+from resources.results import IntervieweeResultsResource, ResultReleaseResource,ResultCreateOrUpdateResource,IntervieweeRankingResource
 
 from resources.feedback import FeedbackResource
 from resources.profile import ProfileResource
@@ -93,3 +93,5 @@ api.add_resource(InviteAcceptanceResource, "/invites/accept/<string:token>")
 api.add_resource(IntervieweeResultsResource, "/interviewee/results")
 api.add_resource(ResultReleaseResource, "/results/<int:result_id>/release")
 api.add_resource(ResultCreateOrUpdateResource, "/results")
+api.add_resource(IntervieweeRankingResource, "/interviewee-rankings")
+

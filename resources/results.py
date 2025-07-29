@@ -86,3 +86,33 @@ class ResultCreateOrUpdateResource(Resource):
             db.session.add(result)
             db.session.commit()
             return {"message": "Result created", "result": result.to_dict()}, 201
+
+class IntervieweeRankingResource(Resource):
+    @jwt_required()
+    def get(self):
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+
+        if user.role != "recruiter":
+            return {"error": "Unauthorized"}, 403
+
+        ranked = (
+            db.session.query(Results, User.name)
+            .join(Submissions, Results.submission_id == Submissions.id)
+            .join(User, User.id == Submissions.user_id)
+            .order_by(Results.score.desc())
+            .all()
+        )
+
+        return [
+            {
+                "name": name,
+                "score": result.score,
+                "rank": result.rank,
+                "pass_status": result.pass_status,
+                "is_released": result.is_released,
+                "time_taken": result.time_taken,
+                "feedback_summary": result.feedback_summary,
+            }
+            for result, name in ranked
+        ], 200

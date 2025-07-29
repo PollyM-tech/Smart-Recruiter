@@ -1,8 +1,8 @@
-"""initial migrations
+"""migrations
 
-Revision ID: bbc6a1521e45
+Revision ID: 9f767e67a7c2
 Revises: 
-Create Date: 2025-07-21 11:24:54.742348
+Create Date: 2025-07-25 11:17:52.680119
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bbc6a1521e45'
+revision = '9f767e67a7c2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,6 +36,19 @@ def upgrade():
     sa.ForeignKeyConstraint(['creator_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('profiles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('company', sa.String(), nullable=True),
+    sa.Column('role', sa.String(), nullable=True),
+    sa.Column('location', sa.String(), nullable=True),
+    sa.Column('skills', sa.Text(), nullable=True),
+    sa.Column('education', sa.Text(), nullable=True),
+    sa.Column('experience', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('invites',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('recruiter_id', sa.Integer(), nullable=True),
@@ -56,10 +69,11 @@ def upgrade():
     op.create_table('questions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('assessment_id', sa.Integer(), nullable=True),
-    sa.Column('type', sa.Enum('multiple_choice', 'codekata', name='question_types'), nullable=False),
+    sa.Column('type', sa.Enum('multiple_choice', 'codekata', 'codewars', name='question_types'), nullable=False),
     sa.Column('prompt', sa.Text(), nullable=True),
     sa.Column('options', sa.JSON(), nullable=True),
     sa.Column('answer_key', sa.Text(), nullable=True),
+    sa.Column('meta', sa.JSON(), nullable=True),
     sa.ForeignKeyConstraint(['assessment_id'], ['assessments.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -107,6 +121,7 @@ def downgrade():
     op.drop_table('submissions')
     op.drop_table('questions')
     op.drop_table('invites')
+    op.drop_table('profiles')
     op.drop_table('assessments')
     op.drop_table('users')
     # ### end Alembic commands ###
