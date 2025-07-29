@@ -2,6 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy_serializer import SerializerMixin
+from datetime import datetime
+
 
 
 
@@ -43,6 +45,7 @@ class Assessments(db.Model, SerializerMixin):
     questions = db.relationship("Questions", back_populates="assessment")
     submissions = db.relationship("Submissions", back_populates="assessment")
     invites = db.relationship("Invites", back_populates="assessment")
+    notifications = db.relationship("Notification", back_populates="assessment")
 
     serialize_rules = ("-creator", "-questions", "-submissions", "-invites")
 
@@ -51,10 +54,14 @@ class Questions(db.Model, SerializerMixin):
     __tablename__ = "questions"
     id = db.Column(db.Integer, primary_key=True)
     assessment_id = db.Column(db.Integer, db.ForeignKey("assessments.id"))
-    type = db.Column(Enum("multiple_choice", "codekata", name="question_types"), nullable=False)
+    type = db.Column(
+        Enum("multiple_choice", "codekata", "codewars", name="question_types"),
+        nullable=False,
+    )
     prompt = db.Column(db.Text)
     options = db.Column(db.JSON)
     answer_key = db.Column(db.Text)
+    meta = db.Column(db.JSON)  # 🌟 Optional: for Codewars metadata
 
     assessment = db.relationship("Assessments", back_populates="questions")
     feedback_entries = db.relationship("Feedback", back_populates="question")
@@ -157,3 +164,26 @@ class Profile(db.Model, SerializerMixin):
     user = db.relationship("User", back_populates="profiles")
 
     serialize_rules = ("-user",)
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    text = db.Column(db.String(255), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.now)
+    read = db.Column(db.Boolean, default=False)
+
+    assessment_id = db.Column(db.Integer, db.ForeignKey("assessments.id"), nullable=True)
+    assessment = db.relationship("Assessments", back_populates="notifications")
+
+
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "text": self.text,
+            "timestamp": self.timestamp.isoformat(),
+            "read": self.read,
+            "assessmentId": self.assessment_id,
+        }

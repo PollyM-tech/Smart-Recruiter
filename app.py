@@ -9,14 +9,16 @@ from flask_mail import Mail
 from models import db
 from resources.user import LoginResource
 from resources.user import SignupResource
-from resources.user import UserListResource
+from resources.user import UserListResource, RecruiterStatsResource
 from resources.assessments import AssessmentResource
 from resources.Questions import QuestionDetailResource,QuestionsListResource
-from resources.results import IntervieweeResultsResource, ResultReleaseResource,ResultCreateOrUpdateResource
+from resources.results import IntervieweeResultsResource, ResultReleaseResource,ResultCreateOrUpdateResource,IntervieweeRankingResource
 
 from resources.feedback import FeedbackResource
 from resources.profile import ProfileResource
 from resources.Submission import SubmissionListResource
+from resources.notification import NotificationListResource,NotificationReadResource
+
 
 #from resources.profile import IntervieewProfileResource
 from resources.Submission import SubmissionListResource,SubmissionDetailResource
@@ -93,3 +95,7 @@ api.add_resource(InviteAcceptanceResource, "/invites/accept/<string:token>")
 api.add_resource(IntervieweeResultsResource, "/interviewee/results")
 api.add_resource(ResultReleaseResource, "/results/<int:result_id>/release")
 api.add_resource(ResultCreateOrUpdateResource, "/results")
+api.add_resource(IntervieweeRankingResource, "/interviewee-rankings")
+api.add_resource(NotificationListResource, "/notifications")
+api.add_resource(NotificationReadResource, "/notifications/<int:notification_id>/read")
+api.add_resource(RecruiterStatsResource, "/stats/recruiter")
