@@ -1,8 +1,8 @@
-"""initial migrations
+"""initial migrate
 
-Revision ID: bbc6a1521e45
+Revision ID: 55568fab255b
 Revises: 
-Create Date: 2025-07-21 11:24:54.742348
+Create Date: 2025-07-23 20:51:50.697308
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bbc6a1521e45'
+revision = '55568fab255b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,6 +34,19 @@ def upgrade():
     sa.Column('published', sa.Boolean(), nullable=True),
     sa.Column('time_limit', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['creator_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('profiles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('company', sa.String(), nullable=True),
+    sa.Column('role', sa.String(), nullable=True),
+    sa.Column('location', sa.String(), nullable=True),
+    sa.Column('skills', sa.Text(), nullable=True),
+    sa.Column('education', sa.Text(), nullable=True),
+    sa.Column('experience', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('invites',
@@ -107,6 +120,7 @@ def downgrade():
     op.drop_table('submissions')
     op.drop_table('questions')
     op.drop_table('invites')
+    op.drop_table('profiles')
     op.drop_table('assessments')
     op.drop_table('users')
     # ### end Alembic commands ###
