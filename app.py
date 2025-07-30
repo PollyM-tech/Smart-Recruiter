@@ -32,9 +32,12 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 api = Api(app)
+basedir = os.path.abspath(os.path.dirname(__file__))
 
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+    "SQLALCHEMY_DATABASE_URI",
+    "sqlite:///" + os.path.join(basedir, "smart-recruiter.db"),
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = False
