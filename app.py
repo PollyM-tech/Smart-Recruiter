@@ -68,6 +68,9 @@ mail = Mail(app) # Initialize Flask-Mail
 db.init_app(app)
 
 
+def create_tables():
+    db.create_all()
+
 @app.route("/")
 def index():
     return {"message": "Welcome to smart recruiter"}, 200
