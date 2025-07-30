@@ -1,8 +1,8 @@
-"""initial migrate
+"""migrations
 
-Revision ID: 55568fab255b
+Revision ID: 25efde22a1a7
 Revises: 
-Create Date: 2025-07-23 20:51:50.697308
+Create Date: 2025-07-30 16:34:36.749110
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '55568fab255b'
+revision = '25efde22a1a7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -66,13 +66,25 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('token')
     )
+    op.create_table('notifications',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('text', sa.String(length=255), nullable=False),
+    sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.Column('read', sa.Boolean(), nullable=True),
+    sa.Column('assessment_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['assessment_id'], ['assessments.id'], ),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('questions',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('assessment_id', sa.Integer(), nullable=True),
-    sa.Column('type', sa.Enum('multiple_choice', 'codekata', name='question_types'), nullable=False),
+    sa.Column('type', sa.Enum('multiple_choice', 'codekata', 'codewars', name='question_types'), nullable=False),
     sa.Column('prompt', sa.Text(), nullable=True),
     sa.Column('options', sa.JSON(), nullable=True),
     sa.Column('answer_key', sa.Text(), nullable=True),
+    sa.Column('meta', sa.JSON(), nullable=True),
     sa.ForeignKeyConstraint(['assessment_id'], ['assessments.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -119,6 +131,7 @@ def downgrade():
     op.drop_table('feedback')
     op.drop_table('submissions')
     op.drop_table('questions')
+    op.drop_table('notifications')
     op.drop_table('invites')
     op.drop_table('profiles')
     op.drop_table('assessments')
