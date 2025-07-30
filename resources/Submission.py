@@ -46,6 +46,26 @@ class SubmissionListResource(Resource):
         db.session.commit()
 
         return {"message": "Submission successful", "submission_id": submission.id}, 201
+    @jwt_required()
+    def delete(self):
+        user_id = int(get_jwt_identity())
+
+        # Grab all submissions linked to assessments created by this user
+        submissions = (
+            Submissions.query
+            .join(Assessments)
+            .filter(Assessments.creator_id == user_id)
+            .all()
+        )
+
+        if not submissions:
+            return {"message": "No submissions found"}, 404
+
+        for sub in submissions:
+            db.session.delete(sub)
+
+        db.session.commit()
+        return {"message": "All submissions deleted"}, 200
     
 
 class SubmissionDetailResource(Resource):

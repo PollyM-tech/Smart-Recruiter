@@ -5,14 +5,13 @@ __pycache__/
 *.egg-info/
 *.pyo
 
-env/
+
 venv/
 
-instance/
-migrations/versions/
+
 .vscode/
 
 
 *.log
 
-.env
+
