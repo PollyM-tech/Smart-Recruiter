@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 bcrypt = "*"
 blinker = "*"
-flask = "*"
 flask-jwt-extended = "*"
 python-dotenv = "*"
 flask-migrate = "*"
@@ -18,6 +17,8 @@ sqlalchemy = "*"
 sqlalchemy-serializer = "*"
 werkzeug = "*"
 flask-cors = "*"
+flask = "*"
+gunicorn = "*"
 
 [dev-packages]
 
